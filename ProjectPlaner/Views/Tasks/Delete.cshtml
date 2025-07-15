@@ -1,0 +1,61 @@
+@model ProjectPlaner.Models.Entity.Task
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Task</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">            
+            Task name
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.name)
+        </dd>
+        <dt class="col-sm-2">            
+            Project name
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.project.name)
+        </dd>
+
+        <dt class="col-sm-2">
+            Status
+        </dt>
+        <dd class="col-sm-10">
+            @Model.GetStatusDisplayName()
+        </dd>
+        <dt class = "col-sm-2">
+            Time-limit
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.time_limit)
+        </dd>
+        <dt class = "col-sm-2">
+            Description
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.description)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="taskId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> 
+        @if (User.IsInRole("Admin")) {
+            <a asp-action="Index">Back to List</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+        }
+        
+    </form>
+</div>

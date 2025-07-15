@@ -1,0 +1,65 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+
+<div class="row">
+    <div class="col-md-4 mx-auto p-3">
+        
+        <h2 class="text-center mb-3">Create an account</h2>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">                
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <div>
+                    <input class="form-control" asp-for="Input.Email" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">User name</label>
+                <div>
+                    <input class="form-control" asp-for="Input.userName" />
+                    <span asp-validation-for="Input.userName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div>
+                    <input class="form-control" asp-for="Input.Password" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                <div>
+                    <input class="form-control" asp-for="Input.ConfirmPassword" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>            
+
+            <div class="row mb-3 g-2">
+                <div class="col d-grid">
+                    <button id="registerSubmit" type="submit" class="btn btn-primary rounded-pill py-2 fs-5">Register</button>
+                </div>
+                <div class="col d-grid">
+                    <a class="btn btn-secondary rounded-pill py-2 fs-5" asp-area="" asp-page="Home" role="button">Cancel</a>
+                </div>
+                
+            </div>
+        </form>
+    </div>
+    
+</div>
+
+@* @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+ *@

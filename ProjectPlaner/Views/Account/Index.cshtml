@@ -1,0 +1,393 @@
+@{
+    ViewData["name"] = "Project Planer";
+    var overdueTasks = ViewBag.OverdueTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var todayTasks = ViewBag.TodayTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var upcomingTasks = ViewBag.UpcomingTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var completedTasks = ViewBag.CompletedTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var cnt = ViewBag.cnt as int?;
+    var projects = ViewBag.Projects as List<ProjectPlaner.Models.Entity.Project>;
+}
+
+@using ProjectPlaner.Models
+@using System.Globalization
+@using ProjectPlaner.Models.Entity
+
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <hr />
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                    <span>My tasks</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="bi bi-inbox me-2"></i> Today <span class="badge bg-primary rounded-pill float-end">@todayTasks?.Count</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark active bg-light" href="#">
+                            <i class="bi bi-calendar-check me-2"></i> Upcoming <span class="badge bg-secondary rounded-pill float-end">@upcomingTasks?.Count</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="bi bi-calendar-event me-2"></i> Overdue <span class="badge bg-danger rounded-pill float-end">@overdueTasks?.Count</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <i class="bi bi-calendar-event me-2"></i> Completed <span class="badge bg-success rounded-pill float-end">@completedTasks?.Count</span>
+                        </a>
+                    </li>
+
+                </ul>
+                <hr />
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                    <span>My projects</span>
+                </h6>
+                <ul class="nav flex-column mb-2">
+                    @foreach (var item in projects)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="#">
+                                <i class="bi bi-star me-2"></i> @item.name
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Today</h1>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="mb-3">@DateTime.Today.ToString("dd MMMM", new CultureInfo("en-EN")) - Today</h5>
+                <div class="d-grid mb-3">
+                    <a asp-controller="Tasks" asp-action="Create" class="btn btn-primary btn-lg text-decoration-none">
+                        <i class="bi bi-plus-lg me-2"></i> Add New Task
+                    </a>
+                </div>
+
+                @if (todayTasks != null && todayTasks.Any())
+                {
+                    @foreach (var task in todayTasks)
+                    {
+                        <div class="card mb-2 task-item-card @(task.IsCompleted() ? "bg-success text-white" : "")">
+                            <div class="card-body d-flex justify-content-between align-items-center py-2">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <input type="checkbox" class="form-check-input me-2" onchange="markAsComplete('@task.taskId')" @(task.IsCompleted() ? "checked" : "") @(task.IsCompleted() ? "disabled" : "")>
+                                    <span class="@(task.IsCompleted() ? "text-decoration-line-through" : "")">@task.name</span>
+                                    <div class="task-icons ms-2">                                        
+                                        @if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.InProgress)
+                                        {
+                                            <i class="bi bi-arrow-right-circle-fill text-info me-1" title="In Progress"></i>
+                                        }
+                                        else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.Stopped)
+                                        {
+                                            <i class="bi bi-pause-circle-fill text-warning me-1" title="Stopped"></i>
+                                        }
+                                        else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.Cancelled)
+                                        {
+                                            <i class="bi bi-x-circle-fill text-danger me-1" title="Cancelled"></i>
+                                        }
+                                        else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.NotStarted)
+                                        {
+                                            <i class="bi bi-info-circle-fill text-secondary me-1" title="Not Started"></i>
+                                        }
+
+                                        @if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.ImportantUrgent)
+                                        {
+                                            <i class="bi bi-exclamation-octagon-fill text-danger" title="Important and Urgent"></i>
+                                        }
+                                        else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.ImportantNotUrgent)
+                                        {
+                                            <i class="bi bi-star-fill text-warning" title="Important and Not Urgent"></i>
+                                        }
+                                        else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.NotImportantUrgent)
+                                        {
+                                            <i class="bi bi-bell-fill text-info" title="Not Important and Urgent"></i>
+                                        }
+                                        else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.NotImportantNotUrgent)
+                                        {
+                                            <i class="bi bi-dot text-secondary" title="Not Important and Not Urgent"></i>
+                                        }
+                                    </div>
+                                    <div class="text-muted small ms-3 @(task.IsCompleted() ? "text-white-50" : "")">
+                                        <i class="bi bi-calendar me-1"></i> Today
+                                    </div>
+                                </div>
+                                <div>
+                                    <a asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.taskId" class="btn btn-sm btn-secondary me-1" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-controller="Tasks" asp-action="Delete" asp-route-id="@task.taskId" class="btn btn-sm btn-danger me-1" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No tasks for today.</p>
+                }
+
+                @* Overdue Tasks Section *@
+                @if (overdueTasks != null && overdueTasks.Any())
+                {
+                    <div class="mb-4">
+                        <h5 class="mb-3" data-bs-toggle="collapse" href="#overdueTasksCollapse" role="button" aria-expanded="true" aria-controls="overdueTasksCollapse">
+                            <i class="bi bi-chevron-right me-2"></i> Overdue
+                        </h5>
+                        <div class="collapse show" id="overdueTasksCollapse">
+                            @foreach (var task in overdueTasks)
+                            {
+                                <div class="card mb-2 task-item-card @(task.IsCompleted() ? "bg-success text-white" : "bg-light")">
+                                    <div class="card-body d-flex justify-content-between align-items-center py-2">
+                                        <div class="d-flex align-items-center flex-grow-1">
+                                            <input type="checkbox" class="form-check-input me-2" onchange="markAsComplete('@task.taskId')" @(task.IsCompleted() ? "checked" : "") @(task.IsCompleted() ? "disabled" : "")>
+                                            <span class="text-danger @(task.IsCompleted() ? "text-decoration-line-through text-white" : "")">@task.name</span>
+                                            <div class="task-icons ms-2">                                                
+                                                @if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.InProgress)
+                                                {
+                                                    <i class="bi bi-arrow-right-circle-fill text-info me-1" title="In Progress"></i>
+                                                }
+                                                else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.Stopped)
+                                                {
+                                                    <i class="bi bi-pause-circle-fill text-warning me-1" title="Stopped"></i>
+                                                }
+                                                else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.Cancelled)
+                                                {
+                                                    <i class="bi bi-x-circle-fill text-danger me-1" title="Cancelled"></i>
+                                                }
+                                                else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.NotStarted)
+                                                {
+                                                    <i class="bi bi-info-circle-fill text-secondary me-1" title="Not Started"></i>
+                                                }
+
+                                                @if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.ImportantUrgent)
+                                                {
+                                                    <i class="bi bi-exclamation-octagon-fill text-danger" title="Important and Urgent"></i>
+                                                }
+                                                else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.ImportantNotUrgent)
+                                                {
+                                                    <i class="bi bi-star-fill text-warning" title="Important and Not Urgent"></i>
+                                                }
+                                                else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.NotImportantUrgent)
+                                                {
+                                                    <i class="bi bi-bell-fill text-info" title="Not Important and Urgent"></i>
+                                                }
+                                                else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.NotImportantNotUrgent)
+                                                {
+                                                    <i class="bi bi-dot text-secondary" title="Not Important and Not Urgent"></i>
+                                                }
+                                            </div>
+                                            <div class="text-muted small ms-3 @(task.IsCompleted() ? "text-white-50" : "")">
+                                                <i class="bi bi-calendar me-1"></i> @task.time_limit.ToString("dd MMM yyyy", new CultureInfo("en-EN"))
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.taskId" class="btn btn-sm btn-secondary me-1" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-controller="Tasks" asp-action="Delete" asp-route-id="@task.taskId" class="btn btn-sm btn-danger me-1" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @* Upcoming Tasks Section *@
+                @if (upcomingTasks != null && upcomingTasks.Any())
+                {
+                    <div class="mb-4">
+                        <h5 class="mb-3" data-bs-toggle="collapse" href="#upcomingTasksCollapse" role="button" aria-expanded="true" aria-controls="upcomingTasksCollapse">
+                            <i class="bi bi-chevron-right me-2"></i> Upcoming Tasks
+                        </h5>
+                        <div class="collapse show" id="upcomingTasksCollapse">
+                            @foreach (var task in upcomingTasks)
+                            {
+                                <div class="card mb-2 task-item-card @(task.IsCompleted() ? "bg-success text-white" : "bg-light")">
+                                    <div class="card-body d-flex justify-content-between align-items-center py-2">
+                                        <div class="d-flex align-items-center flex-grow-1">
+                                            <input type="checkbox" class="form-check-input me-2" onchange="markAsComplete('@task.taskId')" @(task.IsCompleted() ? "checked" : "") @(task.IsCompleted() ? "disabled" : "")>
+                                            <span class="@(task.IsCompleted() ? "text-decoration-line-through" : "")">@task.name</span>
+                                            <div class="task-icons ms-2">                                                
+                                                @if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.InProgress)
+                                                {
+                                                    <i class="bi bi-arrow-right-circle-fill text-info me-1" title="In Progress"></i>
+                                                }
+                                                else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.Stopped)
+                                                {
+                                                    <i class="bi bi-pause-circle-fill text-warning me-1" title="Stopped"></i>
+                                                }
+                                                else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.Cancelled)
+                                                {
+                                                    <i class="bi bi-x-circle-fill text-danger me-1" title="Cancelled"></i>
+                                                }
+                                                else if (task.status == ProjectPlaner.Models.Entity.Task.TaskStatus.NotStarted)
+                                                {
+                                                    <i class="bi bi-info-circle-fill text-secondary me-1" title="Not Started"></i>
+                                                }
+
+                                                @if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.ImportantUrgent)
+                                                {
+                                                    <i class="bi bi-exclamation-octagon-fill text-danger" title="Important and Urgent"></i>
+                                                }
+                                                else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.ImportantNotUrgent)
+                                                {
+                                                    <i class="bi bi-star-fill text-warning" title="Important and Not Urgent"></i>
+                                                }
+                                                else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.NotImportantUrgent)
+                                                {
+                                                    <i class="bi bi-bell-fill text-info" title="Not Important and Urgent"></i>
+                                                }
+                                                else if (task.marker == ProjectPlaner.Models.Entity.Task.TaskMarker.NotImportantNotUrgent)
+                                                {
+                                                    <i class="bi bi-dot text-secondary" title="Not Important and Not Urgent"></i>
+                                                }
+                                            </div>
+                                            <div class="text-muted small ms-3 @(task.IsCompleted() ? "text-white-50" : "")">
+                                                <i class="bi bi-calendar me-1"></i> @task.time_limit.ToString("dd MMM yyyy", new CultureInfo("en-EN"))
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.taskId" class="btn btn-sm btn-secondary me-1" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-controller="Tasks" asp-action="Delete" asp-route-id="@task.taskId" class="btn btn-sm btn-danger me-1" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+
+                @* Completed Tasks Section *@
+                @if (completedTasks != null && completedTasks.Any())
+                {
+                    <div class="mb-4">
+                        <h5 class="mb-3" data-bs-toggle="collapse" href="#completedTasksCollapse" role="button" aria-expanded="true" aria-controls="completedTasksCollapse">
+                            <i class="bi bi-chevron-right me-2"></i> Completed Tasks
+                        </h5>
+                        <div class="collapse show" id="completedTasksCollapse">
+                            @foreach (var task in completedTasks)
+                            {
+                                <div class="card mb-2 task-item-card bg-success text-white">
+                                    <div class="card-body d-flex justify-content-between align-items-center py-2">
+                                        <div class="d-flex align-items-center flex-grow-1">
+                                            <input type="checkbox" class="form-check-input me-2 bg-white" checked disabled>
+                                            <span class="text-decoration-line-through">@task.name</span>
+                                            <div class="task-icons ms-2">                                                
+                                                <i class="bi bi-check-circle-fill text-white me-1" title="Completed"></i>
+                                            </div>
+                                            <div class="small text-white-50 ms-3">
+                                                <i class="bi bi-calendar me-1"></i> @task.time_limit.ToString("dd MMM yyyy", new CultureInfo("en-EN"))
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.taskId" class="btn btn-sm btn-secondary me-1" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-controller="Tasks" asp-action="Delete" asp-route-id="@task.taskId" class="btn btn-sm btn-danger me-1" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+        </main>
+    </div>
+</div>
+
+<style>
+    /* Custom CSS for Task Item Display */
+    .task-item-card {
+        border-radius: 0.5rem; /* Rounded corners */
+        border: 1px solid #dee2e6; /* Default border color */
+        transition: box-shadow 0.3s ease-in-out;
+        position: relative; /* Needed for positioning action icons */
+        overflow: hidden; /* Ensure content and positioned elements are within bounds */
+    }
+
+        .task-item-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Shadow on hover */
+        }
+
+    
+
+    /* Adjustments for completed task cards */
+    .task-item-card.bg-success .task-actions {
+        background-color: transparent; /* No background for completed tasks */
+        box-shadow: none; /* No shadow for completed tasks */
+    }
+
+    /* Show task-actions on hover of the task card */
+    .task-item-card:hover .task-actions {
+        display: flex; /* Show on hover */
+        align-items: center; /* Align items vertically */
+    }
+
+    /* Style for status and marker icons */
+    .task-icons {
+        display: flex;
+        align-items: center;
+        /* margin-left: auto; This is already handled by ms-auto in HTML */
+    }
+
+        .task-icons i {
+            font-size: 1.1em; /* Adjust icon size */
+            margin: 5px; /* Spacing between icons */
+        }
+
+    /* Adjust checkbox appearance for completed tasks */
+    .task-item-card.bg-success .form-check-input {
+        border-color: #fff; /* White border for checkbox on green background */
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function markAsComplete(taskId) {
+            fetch('/Account/MarkAsComplete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value // Include anti-forgery token
+                },
+                body: `id=${taskId}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload(); 
+                } else {
+                    alert('Error marking task as complete.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            });
+        }
+
+        
+    </script>
+}

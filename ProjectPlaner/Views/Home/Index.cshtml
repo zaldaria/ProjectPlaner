@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Welcome to Your Planner";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-section">
+    <div class="container">
+        <h1>Organize ideas, projects and life.</h1>
+        <p>
+            Our planner will help you organize tasks,
+            focus on what's important and achieve your goals every day.
+        </p>
+        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+            <a class="btn btn-primary rounded-pill px-5 fs-5" asp-area="Identity" asp-page="/Account/Register">Get Started Free</a>
+            <a class="btn btn-outline-secondary rounded-pill px-5 fs-5" asp-area="Identity" asp-page="/Account/Login">Already have an account?</a>
+        </div>
+    </div>
+</div>
+
+@* <div class="container text-center">
+    <img src="~/images/app-screenshot.png" alt="Planner application interface" class="img-fluid app-preview" />
+</div> *@
