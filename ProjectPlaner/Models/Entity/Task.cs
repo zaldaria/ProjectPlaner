@@ -9,23 +9,26 @@ namespace ProjectPlaner.Models.Entity
         public Guid taskId { get; set; }
         public string? userId { get; set; }        
         public IdentityUser? user { get; set; }
+
+        [Required(ErrorMessage = "Task name is required.")]
+        [StringLength(100, ErrorMessage = "Task name cannot exceed 100 characters.")]
         public string name { get; set; }
         public Project? project {  get; set; } 
-        public Guid? projectId { get; set; }
-        public List<Mark> marks {  get; set; }
+        public Guid? projectId { get; set; }        
         public TaskMarker marker { get; set; } 
-        public TaskStatus status { get; set; } 
-        public DateTime time_limit { get; set; }
-        public string description { get; set; }
+        public TaskStatus status { get; set; }
+
+        [Required(ErrorMessage = "Time limit is required.")]
+        [DataType(DataType.DateTime)]
+        public DateTime time_limit { get; set; }        
+        public string? description { get; set; }
 
         public Task()
         {
-            name = string.Empty;           
-            marks = new List<Mark>();
+            name = string.Empty;   
             marker = TaskMarker.NotSet;
             status = TaskStatus.NotSet;
-            time_limit = new DateTime();
-            description = string.Empty;
+            time_limit = DateTime.Now;            
         }
 
         public enum TaskMarker

@@ -7,7 +7,6 @@ using ProjectPlaner.Data;
 
 namespace ProjectPlaner.Controllers
 {
-    [Authorize(Roles = "Admin,User")] 
     public class TasksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,25 +19,19 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Tasks
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            var currentUser = await _userManager.GetUserAsync(User); 
-            
-            IQueryable<ProjectPlaner.Models.Entity.Task> applicationDbContext;
-            if (await _userManager.IsInRoleAsync(currentUser, "Admin"))
-            {
-                applicationDbContext = _context.tasks.Include(t => t.project).Include(t => t.user); // Include user for Index if needed
-            }
-            else
-            {
-                applicationDbContext = _context.tasks.Include(t => t.project)
-                                                     .Where(t => t.userId == currentUser.Id); // Filter by userId
-            }
+            var currentUser = await _userManager.GetUserAsync(User);
 
+            IQueryable<ProjectPlaner.Models.Entity.Task> applicationDbContext;
+            applicationDbContext = _context.tasks.Include(t => t.project).Include(t => t.user);
+         
             return View(await applicationDbContext.ToListAsync());
         }
 
         // GET: Tasks/Details/5
+        [Authorize(Roles = "Admin,User")] 
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -48,12 +41,13 @@ namespace ProjectPlaner.Controllers
 
             var task = await _context.tasks
                 .Include(t => t.project)
+                .Include(t => t.user)
                 .FirstOrDefaultAsync(m => m.taskId == id);
             if (task == null)
             {
                 return NotFound();
             }
-            
+
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
             {
@@ -64,6 +58,7 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Tasks/Create
+        [Authorize(Roles = "Admin,User")] 
         public IActionResult Create()
         {
             ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name");
@@ -71,12 +66,10 @@ namespace ProjectPlaner.Controllers
         }
 
         // POST: Tasks/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("userId,user,taskId,name,projectId,status,marker,time_limit,description")] Models.Entity.Task task)
+        [Authorize(Roles = "Admin,User")] 
+        public async Task<IActionResult> Create([Bind("taskId,name,projectId,status,marker,time_limit,description")] Models.Entity.Task task)
         {
             if (ModelState.IsValid)
             {
@@ -85,7 +78,7 @@ namespace ProjectPlaner.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
 
                 task.userId = currentUser.Id;
-                task.user = currentUser; 
+                task.user = currentUser;
 
                 _context.Add(task);
                 await _context.SaveChangesAsync();
@@ -100,6 +93,7 @@ namespace ProjectPlaner.Controllers
 
 
         // GET: Tasks/Edit/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -112,7 +106,7 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-            
+
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
             {
@@ -123,25 +117,23 @@ namespace ProjectPlaner.Controllers
             return View(task);
         }
 
-
         // POST: Tasks/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")] 
         public async Task<IActionResult> Edit(Guid id, [Bind("userId,user,taskId,name,projectId,status,marker,time_limit,description")] Models.Entity.Task task)
         {
             if (id != task.taskId)
             {
                 return NotFound();
             }
-            
+
             var existingTask = await _context.tasks.AsNoTracking().FirstOrDefaultAsync(t => t.taskId == id);
             if (existingTask == null)
             {
                 return NotFound();
             }
-            
+
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && existingTask.userId != currentUser.Id)
             {
@@ -152,7 +144,7 @@ namespace ProjectPlaner.Controllers
             {
                 try
                 {
-                    task.userId = existingTask.userId;                   
+                    task.userId = existingTask.userId;
 
                     _context.Update(task);
                     await _context.SaveChangesAsync();
@@ -178,21 +170,22 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Tasks/Delete/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
             var task = await _context.tasks
                 .Include(t => t.project)
                 .FirstOrDefaultAsync(m => m.taskId == id);
+
             if (task == null)
             {
                 return NotFound();
             }
-           
+
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
             {
@@ -205,11 +198,12 @@ namespace ProjectPlaner.Controllers
         // POST: Tasks/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var task = await _context.tasks.FindAsync(id);
             if (task != null)
-            {               
+            {
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
                 {

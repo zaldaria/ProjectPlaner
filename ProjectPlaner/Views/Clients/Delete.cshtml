@@ -1,4 +1,4 @@
-﻿@model ProjectPlaner.Models.Entity.Client
+@model ProjectPlaner.Models.Entity.Client
 
 @{
     ViewData["Title"] = "Delete";
@@ -12,19 +12,19 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.name)
+            Client name
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.phone)
+            Phone
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.phone)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.email)
+            Email
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.email)
@@ -34,6 +34,13 @@
     <form asp-action="Delete">
         <input type="hidden" asp-for="clientId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Index">Back to List</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+        }
     </form>
 </div>

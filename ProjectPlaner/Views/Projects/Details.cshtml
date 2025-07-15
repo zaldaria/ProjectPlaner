@@ -1,4 +1,4 @@
-﻿@model ProjectPlaner.Models.Entity.Project
+@model ProjectPlaner.Models.Entity.Project
 
 @{
     ViewData["Title"] = "Details";
@@ -11,31 +11,37 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.name)
+            Project name:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.client)
+            User:
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.client.clientId)
+            @Html.DisplayFor(model => model.user.UserName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.comment)
+            Client:
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.client.name)
+        </dd>
+        <dt class = "col-sm-2">
+            Comment:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.comment)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.deadline)
+            Deadline:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.deadline)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.description)
+            Description:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.description)
@@ -44,5 +50,12 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.projectId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Index">Back to List</a>
+    }
+    else
+    {
+        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+    }
 </div>

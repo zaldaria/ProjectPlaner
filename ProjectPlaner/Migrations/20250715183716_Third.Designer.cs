@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectPlaner.Data;
 
@@ -11,9 +12,11 @@ using ProjectPlaner.Data;
 namespace ProjectPlaner.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250715183716_Third")]
+    partial class Third
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -246,18 +249,15 @@ namespace ProjectPlaner.Migrations
 
                     b.Property<string>("email")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("phone")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("userId")
                         .HasColumnType("nvarchar(450)");
@@ -267,6 +267,25 @@ namespace ProjectPlaner.Migrations
                     b.HasIndex("userId");
 
                     b.ToTable("clients");
+                });
+
+            modelBuilder.Entity("ProjectPlaner.Models.Entity.Mark", b =>
+                {
+                    b.Property<Guid>("markId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("markId");
+
+                    b.ToTable("marks");
                 });
 
             modelBuilder.Entity("ProjectPlaner.Models.Entity.Project", b =>
@@ -279,20 +298,18 @@ namespace ProjectPlaner.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("comment")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("deadline")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("userId")
                         .HasColumnType("nvarchar(450)");
@@ -313,6 +330,7 @@ namespace ProjectPlaner.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("marker")
@@ -321,8 +339,7 @@ namespace ProjectPlaner.Migrations
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("projectId")
                         .HasColumnType("uniqueidentifier");
@@ -344,6 +361,21 @@ namespace ProjectPlaner.Migrations
                     b.HasIndex("userId");
 
                     b.ToTable("tasks");
+                });
+
+            modelBuilder.Entity("taskMark", b =>
+                {
+                    b.Property<Guid>("markId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("taskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("markId", "taskId");
+
+                    b.HasIndex("taskId");
+
+                    b.ToTable("taskMark", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -436,6 +468,21 @@ namespace ProjectPlaner.Migrations
                     b.Navigation("project");
 
                     b.Navigation("user");
+                });
+
+            modelBuilder.Entity("taskMark", b =>
+                {
+                    b.HasOne("ProjectPlaner.Models.Entity.Mark", null)
+                        .WithMany()
+                        .HasForeignKey("markId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjectPlaner.Models.Entity.Task", null)
+                        .WithMany()
+                        .HasForeignKey("taskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProjectPlaner.Models.Entity.Client", b =>

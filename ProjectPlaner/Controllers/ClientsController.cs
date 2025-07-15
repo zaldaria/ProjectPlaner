@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,23 +12,30 @@ using System.Threading.Tasks;
 
 namespace ProjectPlaner.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class ClientsController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public ClientsController(ApplicationDbContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+        public ClientsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Clients
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.clients.ToListAsync());
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            IQueryable<Client> applicationDbContext;
+            applicationDbContext = _context.clients.Include(t => t.user);
+
+            return View(await applicationDbContext.ToListAsync());
         }
 
         // GET: Clients/Details/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -36,7 +44,8 @@ namespace ProjectPlaner.Controllers
             }
 
             var client = await _context.clients
-                .FirstOrDefaultAsync(m => m.clientId == id);
+                .Include(c => c.user)
+                .FirstOrDefaultAsync(c => c.clientId == id);
             if (client == null)
             {
                 return NotFound();
@@ -46,6 +55,7 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Clients/Create
+        [Authorize(Roles = "Admin,User")]
         public IActionResult Create()
         {
             return View();
@@ -56,19 +66,31 @@ namespace ProjectPlaner.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Create([Bind("clientId,name,phone,email")] Client client)
         {
             if (ModelState.IsValid)
             {
                 client.clientId = Guid.NewGuid();
+
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                client.userId = currentUser.Id;
+                client.user = currentUser;
+
                 _context.Add(client);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction(nameof(Index));
+                else
+                    return RedirectToAction("Index", "Account");
             }
             return View(client);
         }
 
         // GET: Clients/Edit/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -89,6 +111,7 @@ namespace ProjectPlaner.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid id, [Bind("clientId,name,phone,email")] Client client)
         {
             if (id != client.clientId)
@@ -120,6 +143,7 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Clients/Delete/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -140,6 +164,7 @@ namespace ProjectPlaner.Controllers
         // POST: Clients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var client = await _context.clients.FindAsync(id);

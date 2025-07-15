@@ -1,31 +1,39 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjectPlaner.Data;
 using ProjectPlaner.Models.Entity;
+using System.Threading.Tasks;
 
 
 namespace ProjectPlaner.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class ProjectsController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public ProjectsController(ApplicationDbContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+        public ProjectsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Projects
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.projects.Include(p => p.client);
-            return View(await applicationDbContext.ToListAsync());
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            IQueryable<Project> applicationDbContext;
+            applicationDbContext = _context.projects.Include(t => t.client).Include(t => t.user);
+
+            return View(await applicationDbContext.ToListAsync());            
         }
 
         // GET: Projects/Details/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -35,6 +43,7 @@ namespace ProjectPlaner.Controllers
 
             var project = await _context.projects
                 .Include(p => p.client)
+                .Include(p => p.user)
                 .FirstOrDefaultAsync(m => m.projectId == id);
             if (project == null)
             {
@@ -45,9 +54,10 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Projects/Create
+        [Authorize(Roles = "Admin,User")]
         public IActionResult Create()
         {
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "clientId");
+            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name");
             return View();
         }
 
@@ -56,20 +66,31 @@ namespace ProjectPlaner.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Create([Bind("projectId,name,clientId,comment,deadline,description")] Project project)
         {
             if (ModelState.IsValid)
             {
                 project.projectId = Guid.NewGuid();
+
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                project.userId = currentUser.Id;
+                project.user = currentUser;
+
                 _context.Add(project);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction(nameof(Index));
+                else
+                    return RedirectToAction("Index", "Account");
             }
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "clientId", project.clientId);
+            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name", project.clientId);
             return View(project);
         }
 
         // GET: Projects/Edit/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -82,7 +103,7 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "clientId", project.clientId);
+            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name", project.clientId);
             return View(project);
         }
 
@@ -91,6 +112,7 @@ namespace ProjectPlaner.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid id, [Bind("projectId,name,clientId,comment,deadline,description")] Project project)
         {
             if (id != project.projectId)
@@ -123,6 +145,7 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Projects/Delete/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -144,6 +167,7 @@ namespace ProjectPlaner.Controllers
         // POST: Projects/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var project = await _context.projects.FindAsync(id);

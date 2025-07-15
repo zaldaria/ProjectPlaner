@@ -1,4 +1,4 @@
-﻿@model ProjectPlaner.Models.Entity.Project
+@model ProjectPlaner.Models.Entity.Project
 
 @{
     ViewData["Title"] = "Create";
@@ -13,37 +13,44 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="name" class="control-label"></label>
+                <label asp-for="name" class="control-label">Project name</label>
                 <input asp-for="name" class="form-control" />
                 <span asp-validation-for="name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="clientId" class="control-label"></label>
-                <select asp-for="clientId" class ="form-control" asp-items="ViewBag.clientId"></select>
+                <label asp-for="clientId" class="control-label">Client</label>
+                <select asp-for="clientId" class="form-control" asp-items="ViewBag.clientId"><option value=""></option></select>
             </div>
             <div class="form-group">
-                <label asp-for="comment" class="control-label"></label>
+                <label asp-for="comment" class="control-label">Comment</label>
                 <input asp-for="comment" class="form-control" />
                 <span asp-validation-for="comment" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="deadline" class="control-label"></label>
+                <label asp-for="deadline" class="control-label">Deadline</label>
                 <input asp-for="deadline" class="form-control" />
                 <span asp-validation-for="deadline" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="description" class="control-label"></label>
+                <label asp-for="description" class="control-label">Description</label>
                 <input asp-for="description" class="form-control" />
                 <span asp-validation-for="description" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="btn btn-outline-primary" asp-action="Index">Back to List</a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+                }
             </div>
+            
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+
 

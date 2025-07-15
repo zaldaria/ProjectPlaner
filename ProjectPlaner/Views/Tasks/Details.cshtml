@@ -11,32 +11,37 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.name)
+            Task name:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.name)
         </dd>
+        <dt class = "col-sm-2">
+            User:
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.user.UserName)
+        </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.project)
+            Project:
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.project.name)
         </dd>
-
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.status)
+            Status:
         </dt>
         <dd class="col-sm-10">
             @Model.GetStatusDisplayName()
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.time_limit)
+            Time-limit:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.time_limit)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.description)
+            Description:
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.description)
@@ -45,5 +50,12 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.taskId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Index">Back to List</a>
+    }
+    else
+    {
+        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+    }
 </div>

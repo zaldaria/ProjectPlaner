@@ -20,11 +20,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => {
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<TaskDbStorage>();
-builder.Services.AddScoped<ProjectDbStorage>();
-builder.Services.AddScoped<ClientDbStorage>();
-builder.Services.AddScoped<MarkDbStorage>();
-
 //builder.Services.AddRazorPages();
 
 var app = builder.Build();

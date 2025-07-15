@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProjectPlaner.Models.Entity.Client>
+@model IEnumerable<ProjectPlaner.Models.Entity.Client>
 
 @{
     ViewData["Title"] = "Index";
@@ -16,6 +16,10 @@
                 @Html.DisplayNameFor(model => model.name)
             </th>
             <th>
+                @* @Html.DisplayNameFor(model => model.user.UserName) *@
+                user_name
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.phone)
             </th>
             <th>
@@ -29,6 +33,9 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.user.UserName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.phone)

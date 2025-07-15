@@ -16,9 +16,7 @@ namespace ProjectPlaner.Data
 
         public DbSet<Models.Entity.Task> tasks { get; set; } = null!;
         public DbSet<Project> projects { get; set; } = null!;
-        public DbSet<Client> clients { get; set; } = null!;
-        public DbSet<Mark> marks { get; set; } = null!;
-
+        public DbSet<Client> clients { get; set; } = null!;        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,10 +38,7 @@ namespace ProjectPlaner.Data
             modelBuilder.Entity<Client>()
                 .Property(e => e.clientId)
                 .ValueGeneratedOnAdd();
-            modelBuilder.Entity<Mark>()
-                .Property(e => e.markId)
-                .ValueGeneratedOnAdd();
-
+            
 
             modelBuilder.Entity<Project>()
                 .HasMany(p => p.tasks)             // у проекта много задач
@@ -68,23 +63,19 @@ namespace ProjectPlaner.Data
                 .WithMany(c => c.projects)
                 .HasForeignKey(p => p.clientId)
                 .OnDelete(DeleteBehavior.SetNull);
+            
 
-            modelBuilder.Entity<Models.Entity.Task>()
-                .HasMany(t => t.marks)
-                .WithMany(m => m.tasks)
-                .UsingEntity<Dictionary<string, object>>("taskMark",
-                    j => j
-                    .HasOne<Mark>()
-                    .WithMany()
-                    .HasForeignKey("markId")
-                    .OnDelete(DeleteBehavior.Cascade), // Поведение при удалении Mark
-                    j => j
-                    .HasOne<Models.Entity.Task>()
-                    .WithMany()
-                    .HasForeignKey("taskId")
-                    .OnDelete(DeleteBehavior.Cascade), // Поведение при удалении Task
-                    j => j.ToTable("taskMark"));
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.user)
+                .WithMany()
+                .HasForeignKey(p => p.userId)
+                .IsRequired(false);
 
+            modelBuilder.Entity<Client>()
+               .HasOne(p => p.user)
+               .WithMany() 
+               .HasForeignKey(p => p.userId)
+               .IsRequired(false);
 
             var admin = new IdentityRole
             {

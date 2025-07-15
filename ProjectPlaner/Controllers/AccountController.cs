@@ -28,9 +28,14 @@ namespace ProjectPlaner.Controllers
                                           .Where(t => t.userId == userId) 
                                           .Include(t => t.project) 
                                           .ToListAsync();
-
-            var projects = await _context.projects.ToListAsync(); 
             
+            var projects = await _context.projects
+                                         .Where(p => p.userId == userId) 
+                                         .ToListAsync();
+            var clients = await _context.clients
+                                         .Where(p => p.userId == userId) 
+                                         .ToListAsync();
+
             var overdueTasks = userTasks
                 .Where(t => t.time_limit < now && !t.IsCompleted())
                 .OrderBy(t => t.time_limit)
@@ -63,7 +68,8 @@ namespace ProjectPlaner.Controllers
             ViewBag.UpcomingTasks = upcomingTasks;
             ViewBag.CompletedTasks = completedTasks;
 
-            ViewBag.Projects = projects; 
+            ViewBag.Projects = projects;
+            ViewBag.Clients = clients;
 
             return View();
         }
@@ -104,10 +110,14 @@ namespace ProjectPlaner.Controllers
             ViewBag.CompletedTasks = projectTasks
                 .Where(t => t.IsCompleted())
                 .OrderByDescending(t => t.time_limit)
-                .ToList();   
-           
+                .ToList();
+
+            var projects = await _context.projects
+                                         .Where(p => p.userId == userId)
+                                         .ToListAsync();
+
             ViewBag.CurrentProjectId = id;
-            ViewBag.Projects = await _context.projects.ToListAsync();
+            ViewBag.Projects = projects;
 
             ViewBag.IsProjectView = true; 
 

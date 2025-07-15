@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectPlaner.Data;
 
@@ -11,9 +12,11 @@ using ProjectPlaner.Data;
 namespace ProjectPlaner.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250715202020_Fourth")]
+    partial class Fourth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,6 +272,25 @@ namespace ProjectPlaner.Migrations
                     b.ToTable("clients");
                 });
 
+            modelBuilder.Entity("ProjectPlaner.Models.Entity.Mark", b =>
+                {
+                    b.Property<Guid>("markId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("markId");
+
+                    b.ToTable("marks");
+                });
+
             modelBuilder.Entity("ProjectPlaner.Models.Entity.Project", b =>
                 {
                     b.Property<Guid>("projectId")
@@ -344,6 +366,21 @@ namespace ProjectPlaner.Migrations
                     b.HasIndex("userId");
 
                     b.ToTable("tasks");
+                });
+
+            modelBuilder.Entity("taskMark", b =>
+                {
+                    b.Property<Guid>("markId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("taskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("markId", "taskId");
+
+                    b.HasIndex("taskId");
+
+                    b.ToTable("taskMark", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -436,6 +473,21 @@ namespace ProjectPlaner.Migrations
                     b.Navigation("project");
 
                     b.Navigation("user");
+                });
+
+            modelBuilder.Entity("taskMark", b =>
+                {
+                    b.HasOne("ProjectPlaner.Models.Entity.Mark", null)
+                        .WithMany()
+                        .HasForeignKey("markId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjectPlaner.Models.Entity.Task", null)
+                        .WithMany()
+                        .HasForeignKey("taskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProjectPlaner.Models.Entity.Client", b =>
