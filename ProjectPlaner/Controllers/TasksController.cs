@@ -4,12 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjectPlaner.Data;
-using ProjectPlaner.Models.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace ProjectPlaner.Controllers
 {
@@ -28,8 +22,8 @@ namespace ProjectPlaner.Controllers
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
-            var currentUser = await _userManager.GetUserAsync(User); // Get current user
-            // Filter tasks to show only those belonging to the current user, or all if Admin
+            var currentUser = await _userManager.GetUserAsync(User); 
+            
             IQueryable<ProjectPlaner.Models.Entity.Task> applicationDbContext;
             if (await _userManager.IsInRoleAsync(currentUser, "Admin"))
             {
@@ -59,8 +53,7 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-
-            // Ensure the user can only view their own task details unless they are Admin
+            
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
             {
@@ -119,8 +112,7 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-
-            // Ensure the user can only edit their own task unless they are Admin
+            
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
             {
@@ -143,16 +135,13 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-
-            // Retrieve the existing task from the database to get the userId and ensure it's not overwritten
-            // Use AsNoTracking() because we will attach the 'task' object from the model binder later
+            
             var existingTask = await _context.tasks.AsNoTracking().FirstOrDefaultAsync(t => t.taskId == id);
             if (existingTask == null)
             {
                 return NotFound();
             }
-
-            // Ensure the user can only edit their own task unless they are Admin
+            
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && existingTask.userId != currentUser.Id)
             {
@@ -163,13 +152,7 @@ namespace ProjectPlaner.Controllers
             {
                 try
                 {
-                    // Manually set userId and user from the existing task to the bound task object
-                    // This prevents the userId from being nullified if it's not in the Bind attribute
-                    task.userId = existingTask.userId;
-                    // You generally don't need to set the navigation property 'user' on the 'task' object being updated
-                    // unless you are explicitly loading it and want to re-attach it to the context,
-                    // which is usually handled by EF Core when the foreign key is set.
-                    // If you face issues, consider loading it: task.user = existingTask.user;
+                    task.userId = existingTask.userId;                   
 
                     _context.Update(task);
                     await _context.SaveChangesAsync();
@@ -209,8 +192,7 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-
-            // Ensure the user can only delete their own task unless they are Admin
+           
             var currentUser = await _userManager.GetUserAsync(User);
             if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
             {
@@ -227,8 +209,7 @@ namespace ProjectPlaner.Controllers
         {
             var task = await _context.tasks.FindAsync(id);
             if (task != null)
-            {
-                // Ensure the user can only delete their own task unless they are Admin
+            {               
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && task.userId != currentUser.Id)
                 {

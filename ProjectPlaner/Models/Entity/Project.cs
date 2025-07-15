@@ -13,8 +13,7 @@ namespace ProjectPlaner.Models.Entity
         public List<Task> tasks { get; set; }
 
         public Project() { 
-            name = string.Empty;
-            //client = new Client();
+            name = string.Empty;            
             comment = string.Empty;
             deadline = new DateTime();
             description = string.Empty;

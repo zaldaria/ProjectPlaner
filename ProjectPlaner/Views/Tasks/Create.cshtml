@@ -24,12 +24,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="status" class="control-label">Status</label>
-                <select asp-for="status" asp-items="Html.GetEnumSelectList<ProjectPlaner.Models.Entity.Task.TaskStatus>()" class="form-control"></select>
+                <select asp-for="status" asp-items="Html.GetEnumSelectList<ProjectPlaner.Models.Entity.Task.TaskStatus>()" class="form-control"><option value="NotSet"></option></select>
                 <span asp-validation-for="status" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="marker" class="control-label">Marker</label>
-                <select asp-for="marker" asp-items="Html.GetEnumSelectList<ProjectPlaner.Models.Entity.Task.TaskMarker>()" class="form-control"></select>
+                <select asp-for="marker" asp-items="Html.GetEnumSelectList<ProjectPlaner.Models.Entity.Task.TaskMarker>()" class="form-control"><option value="NotSet"></option></select>
                 <span asp-validation-for="marker" class="text-danger"></span>
             </div>
             <div class="form-group">

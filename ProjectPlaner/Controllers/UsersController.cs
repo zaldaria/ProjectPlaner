@@ -18,7 +18,7 @@ public class UsersController : Controller
     // GET: Users
     public async Task<IActionResult> Index()
     {
-        var users = await _userManager.Users.ToListAsync();
+        var users = await _userManager.Users.Where(u => u.UserName != "Admin").ToListAsync();
         return View(users);
     }
 

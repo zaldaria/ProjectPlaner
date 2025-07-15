@@ -3,13 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectPlaner.Data;
-//using ProjectPlaner.Models;
-//using ProjectPlaner.Models.Entity; // Ensure Task entity is accessible
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Security.Claims; // Required for User.FindFirstValue
-//using System.Threading.Tasks;
 
 namespace ProjectPlaner.Controllers
 {
@@ -124,9 +117,9 @@ namespace ProjectPlaner.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> MarkAsComplete(Guid id) // Changed int id to Guid id to match Task.taskId
+        public async Task<IActionResult> MarkAsComplete(Guid id) 
         {
-            var userId = _userManager.GetUserId(User); // Get current user's ID
+            var userId = _userManager.GetUserId(User); 
             var task = await _context.tasks.Where(t => t.taskId == id && t.userId == userId).FirstOrDefaultAsync(); // Filter by TaskId AND UserId
             if (task != null)
             {
