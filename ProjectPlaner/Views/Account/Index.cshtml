@@ -4,8 +4,14 @@
     var todayTasks = ViewBag.TodayTasks as List<ProjectPlaner.Models.Entity.Task>;
     var upcomingTasks = ViewBag.UpcomingTasks as List<ProjectPlaner.Models.Entity.Task>;
     var completedTasks = ViewBag.CompletedTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var userTasks = ViewBag.UserTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var userId = ViewBag.UserId as string;
     var cnt = ViewBag.cnt as int?;
     var projects = ViewBag.Projects as List<ProjectPlaner.Models.Entity.Project>;
+    //var projectTasks = ViewBag.ProjectTasks as List<ProjectPlaner.Models.Entity.Task>;
+    var currentProjectId = ViewBag.CurrentProjectId as Guid?;
+    var isProjectView = ViewBag.IsProjectView as bool? ?? false;
+    
 }
 
 @using ProjectPlaner.Models
@@ -27,18 +33,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark active bg-light" href="#">
+                        <a class="nav-link text-dark active bg-light" href="#upcoming">
                             <i class="bi bi-calendar-check me-2"></i> Upcoming <span class="badge bg-secondary rounded-pill float-end">@upcomingTasks?.Count</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">
+                        <a class="nav-link text-dark" href="#overdue">
                             <i class="bi bi-calendar-event me-2"></i> Overdue <span class="badge bg-danger rounded-pill float-end">@overdueTasks?.Count</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">
-                            <i class="bi bi-calendar-event me-2"></i> Completed <span class="badge bg-success rounded-pill float-end">@completedTasks?.Count</span>
+                        <a class="nav-link text-dark" href="#completed">
+                            <i class="bi bi-check-circle me-2"></i> Completed <span class="badge bg-success rounded-pill float-end">@completedTasks?.Count</span>
                         </a>
                     </li>
 
@@ -51,9 +57,9 @@
                     @foreach (var item in projects)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="#">
-                                <i class="bi bi-star me-2"></i> @item.name
-                            </a>
+                            <a class="nav-link text-dark @(isProjectView && currentProjectId == item.projectId ? "active bg-light" : "")" asp-controller="Account" asp-action="ProjectTasks" asp-route-id="@item.projectId">
+                                <i class="bi bi-star me-2 text-warning"></i> @item.name
+                            </a>                            
                         </li>
                     }
                 </ul>
@@ -62,11 +68,20 @@
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Today</h1>
+                @if (isProjectView)
+                {
+                    <div>
+                        <h1 class="h2">@projects.FirstOrDefault(p => p.projectId == currentProjectId)?.name</h1>
+                    </div>                    
+                }
+                else
+                {
+                    <h1 class="h2">Today</h1>
+                }
             </div>
 
             <div class="mb-4">
-                <h5 class="mb-3">@DateTime.Today.ToString("dd MMMM", new CultureInfo("en-EN")) - Today</h5>
+                <h5 class="mb-3">@DateTime.Today.ToString("dd MMMM yy", new CultureInfo("en-EN"))</h5>
                 <div class="d-grid mb-3">
                     <a asp-controller="Tasks" asp-action="Create" class="btn btn-primary btn-lg text-decoration-none">
                         <i class="bi bi-plus-lg me-2"></i> Add New Task
@@ -143,7 +158,7 @@
                 {
                     <div class="mb-4">
                         <h5 class="mb-3" data-bs-toggle="collapse" href="#overdueTasksCollapse" role="button" aria-expanded="true" aria-controls="overdueTasksCollapse">
-                            <i class="bi bi-chevron-right me-2"></i> Overdue
+                            <i class="bi bi-chevron-right me-2" id="overdue"></i> Overdue
                         </h5>
                         <div class="collapse show" id="overdueTasksCollapse">
                             @foreach (var task in overdueTasks)
@@ -212,7 +227,7 @@
                 {
                     <div class="mb-4">
                         <h5 class="mb-3" data-bs-toggle="collapse" href="#upcomingTasksCollapse" role="button" aria-expanded="true" aria-controls="upcomingTasksCollapse">
-                            <i class="bi bi-chevron-right me-2"></i> Upcoming Tasks
+                            <i class="bi bi-chevron-right me-2" id="upcoming"></i> Upcoming Tasks
                         </h5>
                         <div class="collapse show" id="upcomingTasksCollapse">
                             @foreach (var task in upcomingTasks)
@@ -282,7 +297,7 @@
                 {
                     <div class="mb-4">
                         <h5 class="mb-3" data-bs-toggle="collapse" href="#completedTasksCollapse" role="button" aria-expanded="true" aria-controls="completedTasksCollapse">
-                            <i class="bi bi-chevron-right me-2"></i> Completed Tasks
+                            <i class="bi bi-chevron-right me-2" id="completed"></i> Completed Tasks
                         </h5>
                         <div class="collapse show" id="completedTasksCollapse">
                             @foreach (var task in completedTasks)
@@ -313,7 +328,10 @@
                         </div>
                     </div>
                 }
-
+                @if (isProjectView)
+                {
+                    <a class="btn btn-outline-secondary rounded-pill" asp-controller="Account" asp-action="Index">Back to My Tasks</a>
+                }
         </main>
     </div>
 </div>

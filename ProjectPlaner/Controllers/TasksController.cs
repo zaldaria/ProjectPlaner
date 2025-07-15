@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ProjectPlaner.Controllers
 {
-    [Authorize(Roles = "Admin,User")] // Allows both Admin and User roles to access the controller
+    [Authorize(Roles = "Admin,User")] 
     public class TasksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -92,7 +92,7 @@ namespace ProjectPlaner.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
 
                 task.userId = currentUser.Id;
-                task.user = currentUser; // Ensure the navigation property is also set
+                task.user = currentUser; 
 
                 _context.Add(task);
                 await _context.SaveChangesAsync();

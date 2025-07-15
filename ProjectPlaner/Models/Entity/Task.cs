@@ -30,11 +30,12 @@ namespace ProjectPlaner.Models.Entity
 
         public enum TaskMarker
         {
-            [Display(Name = "Not Set")] NotSet, //0
-            [Display(Name = "Not important and not urgent")] NotImportantNotUrgent, //1
+            [Display(Name = "Important and urgent")] ImportantUrgent, //0
+            [Display(Name = "Important and not urgent")] ImportantNotUrgent, //1
             [Display(Name = "Not important and urgent")] NotImportantUrgent, //2
-            [Display(Name = "Important and not urgent")] ImportantNotUrgent, //3
-            [Display(Name = "Important and urgent")] ImportantUrgent //4           
+            [Display(Name = "Not important and not urgent")] NotImportantNotUrgent, //2
+            [Display(Name = "Not Set")] NotSet, //4      
+          
         }
         public string GetMarkerDisplayName()
         {
