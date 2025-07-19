@@ -58,10 +58,15 @@ namespace ProjectPlaner.Controllers
         }
 
         // GET: Tasks/Create
-        [Authorize(Roles = "Admin,User")] 
-        public IActionResult Create()
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Create()
         {
-            ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name");
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (User.IsInRole("Admin"))
+                ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name");
+            else
+                ViewData["projectId"] = new SelectList(_context.projects.Where(p => p.userId == currentUser.Id), "projectId", "name");
             return View();
         }
 
@@ -71,11 +76,10 @@ namespace ProjectPlaner.Controllers
         [Authorize(Roles = "Admin,User")] 
         public async Task<IActionResult> Create([Bind("taskId,name,projectId,status,marker,time_limit,description")] Models.Entity.Task task)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
             if (ModelState.IsValid)
             {
-                task.taskId = Guid.NewGuid();
-
-                var currentUser = await _userManager.GetUserAsync(User);
+                task.taskId = Guid.NewGuid();                
 
                 task.userId = currentUser.Id;
                 task.user = currentUser;
@@ -87,7 +91,10 @@ namespace ProjectPlaner.Controllers
                 else
                     return RedirectToAction("Index", "Account");
             }
-            ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name", task.projectId);
+            if (User.IsInRole("Admin"))
+                ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name");
+            else
+                ViewData["projectId"] = new SelectList(_context.projects.Where(p => p.userId == currentUser.Id), "projectId", "name");
             return View(task);
         }
 
@@ -113,29 +120,33 @@ namespace ProjectPlaner.Controllers
                 return Forbid();
             }
 
-            ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name", task.projectId);
+            if (User.IsInRole("Admin"))
+                ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name");
+            else
+                ViewData["projectId"] = new SelectList(_context.projects.Where(p => p.userId == currentUser.Id), "projectId", "name");
+
             return View(task);
         }
 
         // POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,User")] 
-        public async Task<IActionResult> Edit(Guid id, [Bind("userId,user,taskId,name,projectId,status,marker,time_limit,description")] Models.Entity.Task task)
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Edit(Guid id, [Bind("taskId,name,projectId,status,marker,time_limit,description")] Models.Entity.Task task) // Remove userId, user from Bind as they are not editable
         {
             if (id != task.taskId)
             {
                 return NotFound();
             }
 
-            var existingTask = await _context.tasks.AsNoTracking().FirstOrDefaultAsync(t => t.taskId == id);
-            if (existingTask == null)
+            var taskToUpdate = await _context.tasks.FindAsync(id);
+            if (taskToUpdate == null)
             {
                 return NotFound();
             }
 
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && existingTask.userId != currentUser.Id)
+            var currentUser = await _userManager.GetUserAsync(User); 
+            if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && taskToUpdate.userId != currentUser.Id) // Check against the original task's userId
             {
                 return Forbid();
             }
@@ -144,10 +155,15 @@ namespace ProjectPlaner.Controllers
             {
                 try
                 {
-                    task.userId = existingTask.userId;
+                    taskToUpdate.name = task.name; 
+                    taskToUpdate.projectId = task.projectId; 
+                    taskToUpdate.status = task.status; 
+                    taskToUpdate.marker = task.marker;
+                    taskToUpdate.time_limit = task.time_limit; 
+                    taskToUpdate.description = task.description; 
 
-                    _context.Update(task);
-                    await _context.SaveChangesAsync();
+                    _context.Update(taskToUpdate); 
+                    await _context.SaveChangesAsync(); 
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -165,7 +181,11 @@ namespace ProjectPlaner.Controllers
                 else
                     return RedirectToAction("Index", "Account");
             }
-            ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name", task.projectId);
+            if (User.IsInRole("Admin"))
+                ViewData["projectId"] = new SelectList(_context.projects, "projectId", "name");
+            else
+                ViewData["projectId"] = new SelectList(_context.projects.Where(p => p.userId == currentUser.Id), "projectId", "name");
+
             return View(task);
         }
 

@@ -55,9 +55,14 @@ namespace ProjectPlaner.Controllers
 
         // GET: Projects/Create
         [Authorize(Roles = "Admin,User")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name");
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (User.IsInRole("Admin"))
+                ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name");
+            else
+                ViewData["clientId"] = new SelectList(_context.clients.Where(c => c.userId == currentUser.Id), "clientId", "name");
+
             return View();
         }
 
@@ -69,11 +74,11 @@ namespace ProjectPlaner.Controllers
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Create([Bind("projectId,name,clientId,comment,deadline,description")] Project project)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+
             if (ModelState.IsValid)
             {
                 project.projectId = Guid.NewGuid();
-
-                var currentUser = await _userManager.GetUserAsync(User);
 
                 project.userId = currentUser.Id;
                 project.user = currentUser;
@@ -85,7 +90,10 @@ namespace ProjectPlaner.Controllers
                 else
                     return RedirectToAction("Index", "Account");
             }
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name", project.clientId);
+            if (User.IsInRole("Admin"))
+                ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name");
+            else
+                ViewData["clientId"] = new SelectList(_context.clients.Where(c => c.userId == currentUser.Id), "clientId", "name");
             return View(project);
         }
 
@@ -93,6 +101,7 @@ namespace ProjectPlaner.Controllers
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid? id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
             if (id == null)
             {
                 return NotFound();
@@ -103,7 +112,11 @@ namespace ProjectPlaner.Controllers
             {
                 return NotFound();
             }
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name", project.clientId);
+            if (User.IsInRole("Admin"))
+                ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name");
+            else
+                ViewData["clientId"] = new SelectList(_context.clients.Where(c => c.userId == currentUser.Id), "clientId", "name");
+
             return View(project);
         }
 
@@ -115,6 +128,7 @@ namespace ProjectPlaner.Controllers
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(Guid id, [Bind("projectId,name,clientId,comment,deadline,description")] Project project)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
             if (id != project.projectId)
             {
                 return NotFound();
@@ -124,8 +138,20 @@ namespace ProjectPlaner.Controllers
             {
                 try
                 {
-                    _context.Update(project);
-                    await _context.SaveChangesAsync();
+                    var projectToUpdate = await _context.projects.FindAsync(id); 
+                    if (projectToUpdate == null)
+                    {
+                        return NotFound();
+                    }
+                    
+                    projectToUpdate.name = project.name; 
+                    projectToUpdate.clientId = project.clientId; 
+                    projectToUpdate.comment = project.comment; 
+                    projectToUpdate.deadline = project.deadline; 
+                    projectToUpdate.description = project.description; 
+                    
+                    _context.Update(projectToUpdate); 
+                    await _context.SaveChangesAsync(); 
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -138,9 +164,15 @@ namespace ProjectPlaner.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction(nameof(Index));
+                else
+                    return RedirectToAction("ProjectTasks", "Account", new { id = project.projectId });
             }
-            ViewData["clientId"] = new SelectList(_context.clients, "clientId", "clientId", project.clientId);
+            if (User.IsInRole("Admin"))
+                ViewData["clientId"] = new SelectList(_context.clients, "clientId", "name");
+            else
+                ViewData["clientId"] = new SelectList(_context.clients.Where(c => c.userId == currentUser.Id), "clientId", "name");
             return View(project);
         }
 
@@ -177,7 +209,10 @@ namespace ProjectPlaner.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (User.IsInRole("Admin"))
+                return RedirectToAction(nameof(Index));
+            else
+                return RedirectToAction("Index", "Account");
         }
 
         private bool ProjectExists(Guid id)

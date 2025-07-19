@@ -33,7 +33,7 @@ namespace ProjectPlaner.Controllers
                                          .Where(p => p.userId == userId) 
                                          .ToListAsync();
             var clients = await _context.clients
-                                         .Where(p => p.userId == userId) 
+                                         .Where(c => c.userId == userId) 
                                          .ToListAsync();
 
             var overdueTasks = userTasks
@@ -115,16 +115,42 @@ namespace ProjectPlaner.Controllers
             var projects = await _context.projects
                                          .Where(p => p.userId == userId)
                                          .ToListAsync();
+            var clients = await _context.clients
+                                         .Where(c => c.userId == userId)
+                                         .ToListAsync();
 
+            ViewBag.CurrentProject = projects.Where(p => p.projectId == id).FirstOrDefault();
             ViewBag.CurrentProjectId = id;
             ViewBag.Projects = projects;
+            ViewBag.Clients = clients;
 
-            ViewBag.IsProjectView = true; 
-
+            ViewBag.IsProjectView = true;
+            ViewBag.IsClientView = false;
             return View("Index");
         }
 
+        public async Task<IActionResult> ClientInfo(Guid id)
+        {
+            ViewBag.IsClientView = true;
 
+            var client = await _context.clients
+                                         .Where(c => c.clientId == id)
+                                         .FirstOrDefaultAsync();
+            ViewBag.CurrentClient = client;
+            ViewBag.CurrentClientId = client?.clientId;
+
+            var userId = _userManager.GetUserId(User);
+
+            var projects = await _context.projects
+                                         .Where(p => p.userId == userId)
+                                         .ToListAsync();
+            var clients = await _context.clients
+                                         .Where(c => c.userId == userId)
+                                         .ToListAsync();
+            ViewBag.Projects = projects;
+            ViewBag.Clients = clients;
+            return View("Index");
+        }
 
         [HttpPost]
         public async Task<IActionResult> MarkAsComplete(Guid id) 

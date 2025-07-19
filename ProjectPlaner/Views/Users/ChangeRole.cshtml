@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Change User Role";
+    
+    string userId = ViewBag.UserId;
+    string userName = ViewBag.UserName;
+    string userEmail = ViewBag.UserEmail;
+    List<SelectListItem> allRoles = ViewBag.AllRoles;
+}
+
+<h1>Change role</h1>
+
+<h3>User @userName (@userEmail)</h3>
+
+<form asp-action="ChangeRole" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" name="userId" value="@userId" />
+
+    <div class="form-group">
+        <label class="control-label">Roles:</label>
+        <div class="form-check">
+            @if (allRoles != null)
+            {
+                @foreach (var role in allRoles)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="selectedRoles" value="@role.Value" id="@role.Value" @(role.Selected ? "checked" : "")>
+                        <label class="form-check-label" for="@role.Value">
+                            @role.Text
+                        </label>
+                    </div>
+                }
+            }
+        </div>
+       
+        @if (ViewData.ModelState.ContainsKey(string.Empty))
+        {
+            foreach (var error in ViewData.ModelState[string.Empty].Errors)
+            {
+                <span class="text-danger">@error.ErrorMessage</span>
+        
+                <br />
+            }
+        }
+        @if (ViewData.ModelState.ContainsKey("selectedRoles"))
+        {
+            foreach (var error in ViewData.ModelState["selectedRoles"].Errors)
+            {
+                <span class="text-danger">@error.ErrorMessage</span>
+        
+                <br />
+            }
+        }
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

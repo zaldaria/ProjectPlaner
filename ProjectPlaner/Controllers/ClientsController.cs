@@ -123,7 +123,17 @@ namespace ProjectPlaner.Controllers
             {
                 try
                 {
-                    _context.Update(client);
+                    var clientToUpdate = await _context.clients.FindAsync(id);
+                    if (clientToUpdate == null)
+                    {
+                        return NotFound();
+                    }
+
+                    clientToUpdate.name = client.name;
+                    clientToUpdate.phone = client.phone;
+                    clientToUpdate.email = client.email;
+
+                    _context.Update(clientToUpdate); 
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -137,7 +147,10 @@ namespace ProjectPlaner.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction(nameof(Index));
+                else
+                    return RedirectToAction("Index", "Account");
             }
             return View(client);
         }

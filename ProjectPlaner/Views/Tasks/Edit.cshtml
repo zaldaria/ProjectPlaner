@@ -18,7 +18,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="projectId" class="control-label">Project name</label>
-                <select asp-for="projectId" class="form-control" asp-items="ViewBag.projectId"></select>
+                <select asp-for="projectId" class="form-control" asp-items="ViewBag.projectId"><option value=""></option></select>
                 <span asp-validation-for="projectId" class="text-danger"></span>
             </div>
             <div class="form-group">

@@ -20,7 +20,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="clientId" class="control-label">Client</label>
-                <select asp-for="clientId" class="form-control" asp-items="ViewBag.clientId"></select>
+                <select asp-for="clientId" class="form-control" asp-items="ViewBag.clientId"><option value=""></option></select>
                 <span asp-validation-for="clientId" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -46,7 +46,7 @@
                 }
                 else
                 {
-                    <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+                    <a class="btn btn-outline-primary" asp-controller="Account" asp-action="ProjectTasks" asp-route-id="@Model.projectId">Back</a>
                 }
             </div>
         </form>

@@ -38,32 +38,41 @@ namespace ProjectPlaner.Data
             modelBuilder.Entity<Client>()
                 .Property(e => e.clientId)
                 .ValueGeneratedOnAdd();
-            
 
-            modelBuilder.Entity<Project>()
-                .HasMany(p => p.tasks)             // у проекта много задач
-                .WithOne(t => t.project)          // У задачи 1 проект
-                .HasForeignKey(p => p.taskId)        // Внешний ключ
-                .OnDelete(DeleteBehavior.SetNull); // При удалении задачи в проекте связь с этой задачей станет null
+            // Configure the relationship between Task and User
+            modelBuilder.Entity<ProjectPlaner.Models.Entity.Task>()
+                .HasOne(t => t.user)
+                .WithMany()
+                .HasForeignKey(t => t.userId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
-            modelBuilder.Entity<Models.Entity.Task>()
-                .HasOne(t => t.project)          // У задачи есть один проект
-                .WithMany(p => p.tasks)          // У проекта много задач
-                .HasForeignKey(t => t.projectId) // Внешний ключ
-                .OnDelete(DeleteBehavior.Cascade); // При удалении проекта удаляются все его задачи
+            // Configure the relationship between Project and User
+            modelBuilder.Entity<ProjectPlaner.Models.Entity.Project>()
+                .HasOne(p => p.user)
+                .WithMany() 
+                .HasForeignKey(p => p.userId)
+                .OnDelete(DeleteBehavior.ClientSetNull); 
 
-            modelBuilder.Entity<Client>()
+            // Configure the relationship between Client and User
+            modelBuilder.Entity<ProjectPlaner.Models.Entity.Client>()
+                .HasOne(c => c.user)
+                .WithMany()
+                .HasForeignKey(c => c.userId)
+                .OnDelete(DeleteBehavior.ClientSetNull); 
+
+            // Configure cascade delete for Project -> Task (when a Project is deleted, its Tasks are deleted)
+            modelBuilder.Entity<ProjectPlaner.Models.Entity.Project>()
+                .HasMany(p => p.tasks)
+                .WithOne(t => t.project)
+                .HasForeignKey(t => t.projectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure cascade delete for Client -> Project (when a Client is deleted, its Projects are deleted)
+            modelBuilder.Entity<ProjectPlaner.Models.Entity.Client>()
                 .HasMany(c => c.projects)
                 .WithOne(p => p.client)
-                .HasForeignKey(p => p.projectId)
-                .OnDelete(DeleteBehavior.SetNull); // При удалении проекта соответствующее поле у клиента становится null
-
-            modelBuilder.Entity<Project>()
-                .HasOne(p => p.client)
-                .WithMany(c => c.projects)
                 .HasForeignKey(p => p.clientId)
-                .OnDelete(DeleteBehavior.SetNull);
-            
+                .OnDelete(DeleteBehavior.Cascade);            
 
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.user)

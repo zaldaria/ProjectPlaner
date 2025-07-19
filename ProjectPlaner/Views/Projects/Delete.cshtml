@@ -45,14 +45,14 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="projectId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <input type="submit" value="Delete" class="btn btn-danger" /> 
         @if (User.IsInRole("Admin"))
         {
             <a asp-action="Index">Back to List</a>
         }
         else
         {
-            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Index">Back</a>
+            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="ProjectTasks" asp-route-id="@Model.projectId">Back</a>
         }
     </form>
 </div>

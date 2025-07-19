@@ -9,8 +9,13 @@
     var cnt = ViewBag.cnt as int?;
     var projects = ViewBag.Projects as List<ProjectPlaner.Models.Entity.Project>;    
     var currentProjectId = ViewBag.CurrentProjectId as Guid?;
+    var currentProject = ViewBag.CurrentProject as Project;
     var isProjectView = ViewBag.IsProjectView as bool? ?? false;
+    var isClientView = ViewBag.IsClientView as bool? ?? false;
     var clients = ViewBag.Clients as List<ProjectPlaner.Models.Entity.Client>;
+    var currentClientId = ViewBag.CurrentClienId as Guid?;
+    var currentClient = ViewBag.CurrentClient as Client;
+
 }
 
 @using ProjectPlaner.Models
@@ -56,7 +61,7 @@
                     @foreach (var item in projects)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark @(currentProjectId == item.projectId ? "active bg-light" : "")" asp-controller="Account" asp-action="ProjectTasks" asp-route-id="@item.projectId">
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="ProjectTasks" asp-route-id="@item.projectId">
                                 <i class="bi bi-star me-2 text-warning"></i> @item.name
                             </a>                            
                         </li>
@@ -70,29 +75,29 @@
                     @foreach (var item in clients)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark @(userId == item.userId ? "active bg-light" : "")" asp-controller="Account" asp-action="" asp-route-id="">
-                                @* !!! написать asp-action !!! *@
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="ClientInfo" asp-route-id="@item.clientId">
                                 <i class="bi bi-person me-2 text-secondary"></i> @item.name
                             </a>                            
                         </li>
                     }
                 </ul>
             </div>
-        </nav>
-
+        </nav>        
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 @if (isProjectView)
+                {                
+                     <h1>@currentProject?.name</h1>                    
+                }
+                else if (isClientView)
                 {
-                    <div>
-                        <h1 class="h2">@projects.FirstOrDefault(p => p.projectId == currentProjectId)?.name</h1>
-                    </div>                    
+                    <h1>@currentClient?.name</h1>
                 }
                 else
                 {
-                    <h1 class="h2">Today</h1>
-                }
+                    <h1>Today</h1>
+                }                
                 <div class="d-flex gap-2 mb-3 justify-content-end">
                     <a asp-controller="Tasks" asp-action="Create" class="btn btn-primary btn-lg text-decoration-none px-4">
                         <i class="bi bi-plus-lg me-2"></i> Add New Task
@@ -104,12 +109,12 @@
                         <i class="bi bi-plus-lg me-2"></i> Add New Client
                     </a>
                 </div>
-            </div>
-
-            <div class="mb-4">
+            </div>       
+            @if (!isClientView)
+            {
                 <h5 class="mb-3">@DateTime.Today.ToString("dd MMMM yy", new CultureInfo("en-EN"))</h5>
-                
-                @if (todayTasks != null && todayTasks.Any())
+            }        
+            @if (todayTasks != null && todayTasks.Any())
                 {
                     @foreach (var task in todayTasks)
                     {
@@ -167,12 +172,12 @@
                                 </div>
                             </div>
                         </div>
-                    }
                 }
-                else
-                {
-                    <p class="text-muted">No tasks for today.</p>
-                }
+            }
+            else
+            {
+                if (!isClientView) {<p class="text-muted">No tasks for today.</p>}               
+             }
 
                 @* Overdue Tasks Section *@
                 @if (overdueTasks != null && overdueTasks.Any())
@@ -351,9 +356,84 @@
                 }
                 @if (isProjectView)
                 {
-                    <a class="btn btn-outline-secondary rounded-pill" asp-controller="Account" asp-action="Index">Back to My Tasks</a>
+                    <div class="card mb-4 shadow-sm"> 
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Project Info</h5> 
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0"> 
+                                <dt class="col-sm-3"> 
+                                    Client:
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @currentProject?.client?.name
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Comment:
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @currentProject?.comment
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Deadline:
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @currentProject?.deadline.ToString("dd MMMM yy hh:mm", new CultureInfo("en-EN"))
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Description:
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @currentProject?.description
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="card-footer d-flex gap-2 justify-content-end">
+                            <a asp-controller="Projects" asp-action="Edit" asp-route-id="@currentProjectId" class="btn btn-secondary text-decoration-none"> 
+                                <i class="bi bi-pencil me-2"></i> Edit Project
+                            </a>
+                            <a asp-controller="Projects" asp-action="Delete" asp-route-id="@currentProjectId" class="btn btn-danger text-decoration-none"> 
+                                <i class="bi bi-trash me-2"></i> Delete Project
+                            </a>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline-secondary rounded-pill mt-3" asp-controller="Account" asp-action="Index">Back to My Tasks</a> 
                 }
-        </main>
+                @if (isClientView)
+                {
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Client Info</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">                                
+                                <dt class="col-sm-3">
+                                    Phone:
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @currentClient?.phone
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Email:
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @currentClient?.email
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="card-footer d-flex gap-2 justify-content-end">
+                            <a asp-controller="Clients" asp-action="Edit" asp-route-id="@currentClientId" class="btn btn-secondary text-decoration-none">
+                                <i class="bi bi-pencil me-2"></i> Edit Client
+                            </a>
+                            <a asp-controller="Clients" asp-action="Delete" asp-route-id="@currentClientId" class="btn btn-danger text-decoration-none">
+                                <i class="bi bi-trash me-2"></i> Delete Client
+                            </a>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline-secondary rounded-pill mt-3" asp-controller="Account" asp-action="Index">Back to My Tasks</a>
+
+                }
+        </main>       
     </div>
 </div>
 

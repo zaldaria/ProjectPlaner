@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectPlaner.Data;
 
@@ -11,9 +12,11 @@ using ProjectPlaner.Data;
 namespace ProjectPlaner.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250717213442_Delete_behaviour")]
+    partial class Delete_behaviour
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -266,7 +269,7 @@ namespace ProjectPlaner.Migrations
 
                     b.HasIndex("userId");
 
-                    b.ToTable("clients", (string)null);
+                    b.ToTable("clients");
                 });
 
             modelBuilder.Entity("ProjectPlaner.Models.Entity.Project", b =>
@@ -303,7 +306,7 @@ namespace ProjectPlaner.Migrations
 
                     b.HasIndex("userId");
 
-                    b.ToTable("projects", (string)null);
+                    b.ToTable("projects");
                 });
 
             modelBuilder.Entity("ProjectPlaner.Models.Entity.Task", b =>
@@ -343,7 +346,7 @@ namespace ProjectPlaner.Migrations
 
                     b.HasIndex("userId");
 
-                    b.ToTable("tasks", (string)null);
+                    b.ToTable("tasks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -401,7 +404,8 @@ namespace ProjectPlaner.Migrations
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "user")
                         .WithMany()
-                        .HasForeignKey("userId");
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("user");
                 });
@@ -411,11 +415,12 @@ namespace ProjectPlaner.Migrations
                     b.HasOne("ProjectPlaner.Models.Entity.Client", "client")
                         .WithMany("projects")
                         .HasForeignKey("clientId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "user")
                         .WithMany()
-                        .HasForeignKey("userId");
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("client");
 
@@ -427,11 +432,12 @@ namespace ProjectPlaner.Migrations
                     b.HasOne("ProjectPlaner.Models.Entity.Project", "project")
                         .WithMany("tasks")
                         .HasForeignKey("projectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "user")
                         .WithMany()
-                        .HasForeignKey("userId");
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("project");
 
